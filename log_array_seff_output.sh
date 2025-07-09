@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# === Usage: ./log_array_seff.sh 45341166 seff_output.txt ===
+# === Usage: ./log_array_seff.sh 45341166 seff_output.txt ====
 
 ARRAY_JOBID=$1
 OUTPUT_FILE=$2
