@@ -35,7 +35,7 @@ START=$(date +%s)
 
 python RunSimulation_x2.py \
   --mode "$MODE" --mx "$MX" --my "$MY" \
-  --x0 "$X0" --vx0 "$VX0" \ 
+  --x0 "$X0" --vx0 "$VX0" \
   --nx "$NX" --xmin "$XMIN" --xmax "$XMAX" \
   --ny "$NY" --ymin "$YMIN" --ymax "$YMAX" \
   --y0 "$Y0" --vy0 "$VY0" --sigmay "$SIGMAY" \
