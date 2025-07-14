@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=cq_x2
-#SBATCH --array=0-9                     # <-- adjust this based on line count - 2
+#SBATCH --array=0-15                    # <-- adjust this based on line count - 2
 #SBATCH --time=2-00:00:00
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --cpus-per-task=3
 #SBATCH --output=logs_cq/%x_%A_%a.out
 #SBATCH --error=logs_cq/%x_%A_%a.err

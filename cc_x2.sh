@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=cc_x2
-#SBATCH --array=0-9                     # <-- adjust this based on line count - 2
+#SBATCH --array=0-15                     # <-- adjust this based on line count - 2
 #SBATCH --time=00:30:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1

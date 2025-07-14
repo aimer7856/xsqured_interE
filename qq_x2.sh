@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=qq_x2
-#SBATCH --array=0-9                     # <-- adjust this based on line count - 2
-#SBATCH --time=4-00:00:00
-#SBATCH --mem=128G
+#SBATCH --array=0-15                    # <-- adjust this based on line count - 2
+#SBATCH --time=3-00:00:00
+#SBATCH --mem=80G
 #SBATCH --cpus-per-task=3
 #SBATCH --output=logs_qq/%x_%A_%a.out
 #SBATCH --error=logs_qq/%x_%A_%a.err
