@@ -10,7 +10,7 @@ def extract_mx_my(folder_name):
     """
     Extract mx and my values from folder names like mx1.0_my0.5
     """
-    match = re.match(r"mx(\d+(?:\.\d+)?)_my(\d+(?:\.\d+)?)", folder_name)
+    match = re.match(r"*_mx(\d+(?:\.\d+)?)_my(\d+(?:\.\d+)?)", folder_name)
     if match:
         return float(match.group(1)), float(match.group(2))
     return None, None
