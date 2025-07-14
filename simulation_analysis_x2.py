@@ -21,15 +21,15 @@ def load_simulation_data(folder, mode):
     mode must be one of: 'qq', 'cc', 'cq'
     """
     if mode == "qq":
-        npz_files = glob.glob(os.path.join(folder, "*_*.npz"))
+        npz_files = glob.glob(os.path.join(folder, "*.npz"))
     elif mode == "cc":
-        npz_files = glob.glob(os.path.join(folder, "*cc_*.npz"))
+        npz_files = glob.glob(os.path.join(folder, "*.npz"))
     elif mode == "cq":
-        npz_files = glob.glob(os.path.join(folder, "*cq_*.npz"))
+        npz_files = glob.glob(os.path.join(folder, "*.npz"))
     else:
         raise ValueError(f"Unknown mode {mode}")
 
-    json_files = glob.glob(os.path.join(folder, "*_params*.json"))
+    json_files = glob.glob(os.path.join(folder, "*_params.json"))
 
     if not npz_files or not json_files:
         raise FileNotFoundError(f"Missing data for {mode} in {folder}")
@@ -39,7 +39,7 @@ def load_simulation_data(folder, mode):
         params = json.load(f)
     return data, params
 
-def scan_all_data(root_dir="results_test"):
+def scan_all_data(root_dir="results_x2"):
     """
     Scan root_dir for subfolders: 'qq', 'cq', 'cc'
     Under each, look for mx*_my* folders and load data.
@@ -364,7 +364,7 @@ def plot_entropy_energy_by_mx(grouped, out_dir):
         plt.close(fig)
 
 def main():
-    root = "/Users/doyeonkim/Documents/Project_May/Three_Mode_VaryingMxMy_final/results_coherent"
+    root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE/results_x2"
     panel_dir = os.path.join(root, "panels_all_modes")
     summary_dir = os.path.join(root, "entropy_energy_by_mx")
     os.makedirs(panel_dir, exist_ok=True)
