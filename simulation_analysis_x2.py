@@ -48,12 +48,13 @@ def scan_all_data(root_dir="results_x2"):
     """
     folder_map = {
         "qq": "qq",
-        "cq":      "cq",
+        "cq": "cq",
         "cc": "cc"
     }
     results = {}
     for folder_name, mode_key in folder_map.items():
         mode_dir = os.path.join(root_dir, folder_name)
+        print(mode_dir)
         if not os.path.isdir(mode_dir):
             continue
         for sub in os.listdir(mode_dir):
@@ -372,7 +373,7 @@ def main():
 
     all_data = scan_all_data(root_dir=root)
     grouped = {}
-
+   
     for (mx, my), data_dict in all_data.items():
         try:
             process_folder(mx, my, data_dict, panel_dir)
