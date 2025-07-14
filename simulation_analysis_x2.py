@@ -320,7 +320,7 @@ def process_folder(mx, my, data_dict, out_dir):
 
     # Row 3, Col 2: Entropies
     ax = axs[2,2]
-    if "quantum" in data_dict:
+    if "qq" in data_dict:
         ax.plot(t, vn, 'C2-', label='Von Neumann')
         if lin is not None:
             ax.plot(t, lin, 'C3-', label='Linear')
@@ -379,8 +379,8 @@ def main():
             process_folder(mx, my, data_dict, panel_dir)
 
             # Only include quantum entries in entropy-energy summary
-            if "quantum" in data_dict:
-                qdata, _ = data_dict["quantum"]
+            if "qq" in data_dict:
+                qdata, _ = data_dict["qq"]
                 t = qdata["t"]
                 vn = qdata.get("vn_entropy", None)
                 energy = qdata["oscillator"][:,5]
