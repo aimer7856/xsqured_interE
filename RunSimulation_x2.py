@@ -262,7 +262,7 @@ def main():
     base    = args.base
     metadata = {}
 
-    modes = [args.mode] if args.mode != 'all' else ['quantum','cq','classical']
+    modes = [args.mode] if args.mode != 'all' else ['qq','cq','cc']
     
     # inside RunSimulation… before you create the Quantum_Bipartite_System
    # import QuantumSimulationModules_mx_my_memlog as qmod
