@@ -63,7 +63,7 @@ def scan_all_data(root_dir="results_x2"):
             if not os.path.isdir(subpath):
                 continue
             mx, my = extract_mx_my(sub)
-        
+            print(mx, my)
             if mx is None or my is None:
                 continue
             try:
