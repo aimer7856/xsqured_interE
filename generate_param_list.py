@@ -6,8 +6,8 @@ import itertools
 
 # Parameters to sweep
 modes       = ["qq", "cq", "cc"]
-mx_vals     = [0.25,0.5,1.0,2.0,4.0]
-my_vals     = [1.0, 2.0, 4.0]
+mx_vals     = [4.0]
+my_vals     = [1.0]
 x0_vals     = [0.0]
 vx0_vals    = [0.0]
 

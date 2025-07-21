@@ -1,15 +1,15 @@
 #!/bin/bash
-#SBATCH --job-name=qq_x2_x0_1_v1
-#SBATCH --array=0-1                    # <-- adjust this based on line count - 2
+#SBATCH --job-name=qq_x2_x0_1_v2
+#SBATCH --array=0                    # <-- adjust this based on line count - 2
 #SBATCH --time=7-00:00:00
 #SBATCH --mem=125G
 #SBATCH --cpus-per-task=3
-#SBATCH --output=logs_qq_x0_1_v1/%x_%A_%a.out
-#SBATCH --error=logs_qq_x0_1_v1/%x_%A_%a.err
+#SBATCH --output=logs_qq_x0_1_v2/%x_%A_%a.out
+#SBATCH --error=logs_qq_x0_1_v2/%x_%A_%a.err
 #SBATCH --mail-user=doyeon.k@unb.ca
 #SBATCH --mail-type=ALL
 
-mkdir -p logs_qq_x0_1_v1
+mkdir -p logs_qq_x0_1_v2
 
 # Conda activation
 source ~/miniconda3/etc/profile.d/conda.sh
@@ -19,7 +19,7 @@ unset PYTHONPATH
 export PYTHONNOUSERSITE=True
 
 # Read parameter line
-PARAM_FILE="param_list_qq_x0_1.txt"
+PARAM_FILE="param_list_qq.txt"
 # If param_list_qq_x0_1.txt has a header, skip it; otherwise, remove 'tail -n +2'
 LINE=$(tail -n +2 "$PARAM_FILE" | sed -n "$((SLURM_ARRAY_TASK_ID + 1))p")
 
