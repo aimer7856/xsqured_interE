@@ -10,9 +10,7 @@ def extract_mx_my(folder_name):
     """
     Extract mx and my values from folder names like mx1.0_my0.5
     """
-    #match = re.match(r".*_mx(\d+(?:\.\d+)?)_my(\d+(?:\.\d+)?)", folder_name)
-    #match = re.match(r"(?:qq|cc|cq)_mx(\d+(?:\.\d+)?)_my(\d+(?:\.\d+)?)", folder_name)
-    match = re.search(r"mx(\d+(?:\.\d+)?)_my(\d+(?:\.\d+)?)", folder_name)
+    match = re.match(r".*_mx(\d+(?:\.\d+)?)_my(\d+(?:\.\d+)?)", folder_name)
     if match:
         return float(match.group(1)), float(match.group(2))
     return None, None
@@ -61,10 +59,8 @@ def scan_all_data(root_dir="results_x2"):
             continue
         for sub in os.listdir(mode_dir):
             subpath = os.path.join(mode_dir, sub)
-            print(f"[DEBUG] Found sub: {sub} → path: {subpath}")
-
+        
             if not os.path.isdir(subpath):
-                print(f"[DEBUG] Skipping: not a directory → {subpath}")
                 continue
             mx, my = extract_mx_my(sub)
             print(mx, my)
@@ -370,7 +366,7 @@ def plot_entropy_energy_by_mx(grouped, out_dir):
 
 def main():
     #root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE/results_x2"
-    root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/results_test2/results_x2_x0_2"
+    root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE_my1/results_test2/results_x2_x0_2"
     panel_dir = os.path.join(root, "panels_all_modes_x0_2")
     summary_dir = os.path.join(root, "entropy_energy_by_mx")
     os.makedirs(panel_dir, exist_ok=True)
