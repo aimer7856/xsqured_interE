@@ -367,8 +367,8 @@ def plot_entropy_energy_by_mx(grouped, out_dir):
 def main():
     #root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE/results_x2"
     #root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE_my1/results_final/results_x2_x0_5"
-    root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE_my1/results_final/results_x2_x0_5_Neig_192"
-    panel_dir = os.path.join(root, "panels_all_modes_x0_5_Neig_192")
+    root = "/Users/doyeonkim/OneDrive/Documents/Project1_Sanjeev/xsqured_interE_my1/results_final/results_x2_x0_5_Neig_256"
+    panel_dir = os.path.join(root, "panels_all_modes_x0_5_Neig_256")
     summary_dir = os.path.join(root, "entropy_energy_by_mx")
     os.makedirs(panel_dir, exist_ok=True)
     os.makedirs(summary_dir, exist_ok=True)
