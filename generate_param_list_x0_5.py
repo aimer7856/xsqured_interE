@@ -24,7 +24,7 @@ sigmay_vals = [3.0]
 total_time_vals = [30.0]
 timesteps_vals  = [4096]
 lambda_vals = [1.0]
-n_eig_vals  = [192]
+n_eig_vals  = [256]
 
 # Header
 header = [
