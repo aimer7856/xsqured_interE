@@ -8,34 +8,10 @@ Revised: Full implementation with initial wavefunction and time evolution
 
 import numpy as np
 import os
-import time
-import psutil
 import scipy.sparse as sps
 import scipy.sparse.linalg as spla
 from collections import OrderedDict, namedtuple
 
-START_TIME = time.time()
-
-def log_peak_memory(note="", filename=None):
-    if filename is None:
-        filename = os.environ.get("MEM_LOG_FILE")
-        
-     # Ensure header is written once if file is new or empty
-    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
-        with open(filename, "a") as f:
-            f.write("timestamp,elapsed_seconds,note,memory_MB\n")
-
-    
-    # Get memory in MB
-    process = psutil.Process(os.getpid())
-    mem = process.memory_info().rss / 1024 / 1024
-    
-    # Current time and elapsed time
-    timestamp = time.time()
-    elapsed = timestamp - START_TIME  # seconds since script start
-    
-    with open(filename, "a") as f:
-        f.write(f"{timestamp:.2f},{elapsed:.2f},{note},{mem:.2f}\n")
         
         
 # -----------------------------------------------------------------------------
@@ -291,24 +267,20 @@ class Quantum_Bipartite_System:
             # ----------------------------
         
             psi_evol[t, :] = vec
-
+    
     def time_evolution_wavefunction(self):
-        log_peak_memory(note="start time_evolution_wavefunction")
-        #print(f"[DEBUG] Calling log_peak_memory() with MEM_LOG_FILE = {os.environ.get('MEM_LOG_FILE')}")
         k = self.nx * self.ny
         psi0 = self.init_wavefunction()
        
         psi_evol = np.zeros((self.timesteps, k), dtype='complex')
-        log_peak_memory(note="after allocating psi_evol array")
         flat0 = psi0.reshape(k, order='C')
         psi_evol[0,:] = self.normalized_init_wavefunction(flat0)
       
         self.__CN_method(k, psi_evol)
-        log_peak_memory(note="after __CN_method propagation")
-        log_peak_memory(note="end time_evolution_wavefunction")
         
         return psi_evol
-
+    
+   
     
     def get_VN_entanglement(self):
         def F(x):
@@ -376,7 +348,6 @@ class Quantum_Bipartite_System:
           
         Returns T and dict of requested arrays.
         """
-        log_peak_memory(note="start get_expected_data")
         
         ALL = ('oscillator','projectile','vn_entropy',
                'inter_energy','linear_entropy','rho1_diag','rho1')
@@ -401,14 +372,8 @@ class Quantum_Bipartite_System:
             results['linear_entropy'] = np.zeros(self.timesteps)
         if 'rho1_diag'      in include:
             results['rho1_diag']      = np.zeros((self.timesteps,self.nx))
-            
-        log_peak_memory(note="after array allocations")
         
-    
         psi_evol = self.time_evolution_wavefunction()
-        
-        # Generate 10 evenly spaced memory checkpoints
-        checkpoints = np.linspace(0, self.timesteps - 1, num=10, dtype=int)
         
         for t in range(self.timesteps):
             psi = psi_evol[t].reshape((self.ny,self.nx),order='C')
@@ -430,12 +395,5 @@ class Quantum_Bipartite_System:
             if 'linear_entropy' in include:
                 purity = self.oscillator.ds**2*np.real(np.trace(np.dot(rho1,rho1)))
                 results['linear_entropy'][t] = 1.0-purity
-                
-            # Log memory at select checkpoints
-            if t in checkpoints:
-               log_peak_memory(note=f"step {t} in get_expected_data")
-
-            
-        log_peak_memory(note="end get_expected_data")    
         
         return self.T, results
