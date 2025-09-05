@@ -18,36 +18,10 @@ It provides:
  - classical energy Hy
 """
 import numpy as np
-import os
-import time
-import psutil
 from scipy.integrate import solve_ivp
 from scipy.special import factorial, genlaguerre
 
 
-
-START_TIME = time.time()
-
-def log_peak_memory(note="", filename=None):
-    if filename is None:
-        filename = os.environ.get("MEM_LOG_FILE", "func_mem_log.txt")
-        
-     # Ensure header is written once if file is new or empty
-    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
-        with open(filename, "a") as f:
-            f.write("timestamp,elapsed_seconds,note,memory_MB\n")
-
-    
-    # Get memory in MB
-    process = psutil.Process(os.getpid())
-    mem = process.memory_info().rss / 1024 / 1024
-    
-    # Current time and elapsed time
-    timestamp = time.time()
-    elapsed = timestamp - START_TIME  # seconds since script start
-    
-    with open(filename, "a") as f:
-        f.write(f"{timestamp:.2f},{elapsed:.2f},{note},{mem:.2f}\n")
 
 class CQEhrenfestSystem:
     def __init__(self, N_eig: int, xmin,xmax,mx: float, x0: float,vx0: float,ymin:float, ymax:float, my: float, y0: float,  vy0:float, sigmax:float, total_time:float, timesteps:int, lambda_: float, omega: float = 1.0):
@@ -196,7 +170,6 @@ class CQEhrenfestSystem:
         Returns dict with time series and observables.
         """
         
-        log_peak_memory(note="start solve")
         
         N= self.N_eig
         tn = self.timesteps
@@ -229,23 +202,17 @@ class CQEhrenfestSystem:
         Hx_exp = np.empty(tn)
         std_Hx = np.empty(tn)
         
-        # Adaptive memory logging checkpoints
-        checkpoints = set(np.linspace(0, tn - 1, num=10, dtype=int))
-    
+
         for i in range(tn):
             x_exp[i], std_x[i] = self._mean_std(t[i], self.X, C[i])
             px_exp[i], std_px[i] = self._mean_std(t[i], self.P, C[i])
             Hx_exp[i], std_Hx[i] = self._mean_std(t[i], self.Hx, C[i])
             Hx_exp[i]-=0.5 # subtract zero-point energy
             
-            if i in checkpoints:
-               log_peak_memory(note=f"step {i} in solve")
-
                
                
         Hy = py**2 / (2 * self.my)
         
-        log_peak_memory(note="end solve")
         
         return {
             't': t,
@@ -260,4 +227,3 @@ class CQEhrenfestSystem:
             'py': py,
             'Hy': Hy
         }
-        
