@@ -267,7 +267,7 @@ class Quantum_Bipartite_System:
             # ----------------------------
         
             psi_evol[t, :] = vec
-
+    """
     def time_evolution_wavefunction(self):
         k = self.nx * self.ny
         psi0 = self.init_wavefunction()
@@ -279,7 +279,40 @@ class Quantum_Bipartite_System:
         self.__CN_method(k, psi_evol)
         
         return psi_evol
+    """
 
+    def time_evolution_wavefunction(self, out=None, dtype=np.complex128):
+        """
+        Evolve the full wavefunction over all timesteps.
+
+        Parameters
+        ----------
+        out : np.ndarray or numpy.memmap, optional
+            If provided, must have shape (timesteps, nx*ny). Results will be
+            written into this array to avoid allocating a large in-memory array.
+        dtype : numpy dtype, optional
+            Complex dtype for storage (default: complex128). For memory savings
+            on large runs, use np.complex64.
+        """
+        k = self.nx * self.ny
+        psi0 = self.init_wavefunction()
+
+        # allocate output buffer (array or memmap)
+        if out is None:
+            psi_evol = np.zeros((self.timesteps, k), dtype=dtype)
+        else:
+            assert out.shape == (self.timesteps, k), \
+                f"out has shape {out.shape}, expected ({self.timesteps}, {k})"
+            psi_evol = out
+            if psi_evol.dtype != dtype:
+                psi_evol = psi_evol.astype(dtype, copy=False)
+
+        flat0 = psi0.reshape(k, order='C')
+        psi_evol[0, :] = self.normalized_init_wavefunction(flat0).astype(dtype, copy=False)
+
+        # propagate in-place into psi_evol (works with memmap)
+        self.__CN_method(k, psi_evol)
+        return psi_evol
     
     def get_VN_entanglement(self):
         def F(x):
