@@ -10,7 +10,27 @@ set -euo pipefail
 
 module load StdEnv/2023
 module load python/3.10
-module load ffmpeg/6.1.1
+
+# Bring a self-contained ffmpeg into PATH (avoids site module/version issues)
+python -m pip install --user -q --upgrade imageio-ffmpeg
+export FFMPEG_BIN=$(python - <<'PY'
+import imageio_ffmpeg, sys
+sys.stdout.write(imageio_ffmpeg.get_ffmpeg_exe())
+PY
+)
+export PATH="$(dirname "$FFMPEG_BIN"):$PATH"
+
+# Optional: verify ffmpeg is available
+which ffmpeg
+ffmpeg -version | head -n 1 || true
+
+
+# Stage the code to the compute node
+CODE_DIR=/home/dykim/projects/def-sseahra/dykim/xsqured_interE
+WORK_DIR=$SLURM_TMPDIR/xsqured_interE
+mkdir -p "$WORK_DIR"
+rsync -a "$CODE_DIR/" "$WORK_DIR/"
+cd "$WORK_DIR"
 
 # Run the Python driver that streams frames and writes the MP4 to $SLURM_TMPDIR
 python qq_make_mp4.py
