@@ -10,12 +10,9 @@ Use --mode to pick one or all.
 
 from memory_profiler import profile
 
-import os
 import time
-import psutil
 
 import argparse
-import time
 from pathlib import Path
 import numpy as np
 import json
@@ -34,32 +31,7 @@ from CCmodule import ClassicalBipartiteSystem
 
 
 # --- Helpers ---------------------------------------------------------------
-START_TIME = time.time()
 
-def log_peak_memory(note="", filename=None):
-    """
-    Log current peak memory usage and elapsed time to a file.
-    Uses $MEM_LOG_FILE or falls back to 'func_mem_log.txt'.
-    """
-    if filename is None:
-        filename = os.environ.get("MEM_LOG_FILE", "func_mem_log.txt")
-
-    # Get memory in MB
-    process = psutil.Process(os.getpid())
-    mem = process.memory_info().rss / 1024 / 1024
-
-    # Elapsed time since script started
-    timestamp = time.time()
-    elapsed = timestamp - START_TIME
-
-    # Create header if file is new
-    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
-        with open(filename, "a") as f:
-            f.write("timestamp,elapsed_seconds,note,memory_MB\n")
-
-    # Append log line
-    with open(filename, "a") as f:
-        f.write(f"{timestamp:.2f},{elapsed:.2f},{note},{mem:.2f}\n")
 
 def format_hms_str(total_seconds: float) -> str:
     hrs = int(total_seconds // 3600)
@@ -123,14 +95,11 @@ def run_quantum(params: dict):
         'timesteps' : params['timesteps'],
         'lambda_'   : params['lambda_'],
     }
-    log_peak_memory(note="before QQ system init")
     qsys = Quantum_Bipartite_System(**q_params)
-    log_peak_memory(note="after QQ system init")
     T, qdata = qsys.get_expected_data(include=[
         'oscillator','projectile','vn_entropy',
         'inter_energy','std_inter_energy','linear_entropy','rho1_diag'
     ])
-    log_peak_memory("📊 after get_expected_data()")
     # update metadata from the actual run
     q_params['total_time'] = T[-1]
     q_params['timesteps']  = len(T)
@@ -161,11 +130,8 @@ def run_cq(params: dict):
         'timesteps' : params['timesteps'],
         'lambda_'   : params['lambda_'],
     }
-    log_peak_memory(note="before CQ system init")
     cq = CQEhrenfestSystem(**cq_params)
-    log_peak_memory(note="after CQ system init")
     output = cq.solve()
-    log_peak_memory(note="after cq.solve")
     t = output.pop('t')
     cqdata = output
     return t, cqdata, cq_params
@@ -187,9 +153,7 @@ def run_classical(params: dict):
         'total_time': params['total_time'],
         'timesteps' : params['timesteps'],
     }
-    log_peak_memory(note="before CC system init")
     csys = ClassicalBipartiteSystem(**c_params)
-    log_peak_memory(note="after CC system init")
     t_cl, x_c, px_c, y_c, py_c, Hx_c, Hy_c, Hint_c, Htot_c = csys.simulate_rk45_refined()
     cdata = {
         'x'   : x_c,

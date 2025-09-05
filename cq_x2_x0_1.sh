@@ -28,8 +28,6 @@ IFS=',' read -r MODE MX MY X0 VX0 NX XMIN XMAX NY YMIN YMAX Y0 VY0 SIGMAY TOTAL_
 OUT_DIR="results_x2_x0_1/${MODE}/${FILENAME}"
 mkdir -p "$OUT_DIR"
 
-export MEM_LOG_FILE="${OUT_DIR}/mem_log.txt"
-
 RUN_LOG="${OUT_DIR}/run.log"
 START=$(date +%s)
 
