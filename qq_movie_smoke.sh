@@ -5,41 +5,40 @@
 #SBATCH --mem=4G
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-
+#SBATCH --mail-user=doyeon.k@unb.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
 set -euo pipefail
 
-module load StdEnv/2023
-module load python/3.10
+# ---- Clean environment; load a stack that has NumPy + Matplotlib + ffmpeg ----
+module --force purge
+module load StdEnv/2020
 
-# Bring a self-contained ffmpeg into PATH (avoids site module/version issues)
-python -m pip install --user -q --upgrade imageio-ffmpeg
-export FFMPEG_BIN=$(python - <<'PY'
-import imageio_ffmpeg, sys
-sys.stdout.write(imageio_ffmpeg.get_ffmpeg_exe())
+# Scientific Python stack (provides numpy, scipy, matplotlib, etc.)
+module load scipy-stack/2020b    # if 2020b not present, try 2020a (see note below)
+
+# FFmpeg under this stack
+module load ffmpeg/4.3.2
+
+# (Optional) quick sanity checks
+python - <<'PY'
+import sys, numpy as np
+print("Python:", sys.version.split()[0], "NumPy:", np.__version__)
 PY
-)
-export PATH="$(dirname "$FFMPEG_BIN"):$PATH"
-
-# Optional: verify ffmpeg is available
 which ffmpeg
-ffmpeg -version | head -n 1 || true
+ffmpeg -version | head -n 1
 
-
-# Stage the code to the compute node
+# ---- Stage code from PROJECT to node-local SSD and run from there ----
 CODE_DIR=/home/dykim/projects/def-sseahra/dykim/xsqured_interE
 WORK_DIR=$SLURM_TMPDIR/xsqured_interE
 mkdir -p "$WORK_DIR"
 rsync -a "$CODE_DIR/" "$WORK_DIR/"
 cd "$WORK_DIR"
 
-# Run the Python driver that streams frames and writes the MP4 to $SLURM_TMPDIR
+# Run the small movie driver (writes $SLURM_TMPDIR/qq_smoke.mp4)
 python qq_make_mp4.py
 
-# Stage only the final MP4 to SCRATCH
+# Copy only the MP4 to SCRATCH
 DEST="$SCRATCH/qq_movie_smoke_$SLURM_JOB_ID"
 mkdir -p "$DEST"
-
-# qq_make_mp4.py writes qq_smoke.mp4 to $SLURM_TMPDIR
 cp "$SLURM_TMPDIR/qq_smoke.mp4" "$DEST/"
-
 echo "MP4 saved to: $DEST/qq_smoke.mp4"
