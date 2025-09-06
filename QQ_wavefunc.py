@@ -332,6 +332,9 @@ class Quantum_Bipartite_System:
         extent = [self.oscillator.grid_points[0], self.oscillator.grid_points[-1],
                   self.projectile.grid_points[0], self.projectile.grid_points[-1]]
 
+        # Ensure frame filenames are contiguous (0,1,2,...) so ffmpeg reads all frames
+        frame_idx = {"i": 0}
+
         def _save_frame(t_idx, t_val, psi_mat):
             dens = (psi_mat.conj() * psi_mat).real
             vmax_use = np.percentile(dens, 99.5) if vmax is None else vmax
@@ -343,7 +346,9 @@ class Quantum_Bipartite_System:
             ax.set_title(f'|ψ(x,y,t)|^2, t={t_val:.3f}')
             plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
             fig.tight_layout()
-            fig.savefig(os.path.join(outdir, f"frame_{t_idx:05d}.png"))
+            fname = os.path.join(outdir, f"frame_{frame_idx['i']:05d}.png")
+            fig.savefig(fname)
+            frame_idx['i'] += 1
             plt.close(fig)
 
         # Run the evolution and save frames on the fly
@@ -388,8 +393,10 @@ class Quantum_Bipartite_System:
             input_pattern = os.path.join(frames_dir, "frame_%05d.png")
             cmd = [
                 "ffmpeg", "-y",
-                "-r", str(fps),
+                "-framerate", str(fps),
+                "-start_number", "0",
                 "-i", input_pattern,
+                "-c:v", "libx264",
                 "-pix_fmt", "yuv420p",
                 mp4_path,
             ]

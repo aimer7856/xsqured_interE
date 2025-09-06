@@ -18,38 +18,28 @@ except ModuleNotFoundError:
 
 
 def main():
-    # Small, fast configuration (smoke test). Adjust to your production values later.
     qb = Quantum_Bipartite_System(
-        nx=64, xmin=-8.0, xmax=8.0, mx=4.0,
-        x0=2.0, vx0=0.0,
-        ny=256, ymin=-12.0, ymax=40.0, my=0.25,
-        y0=0.0, vy0=0.5,
-        sigmax=0.5, sigmay=1.5,
-        total_time=4.0, timesteps=96,
-        lambda_=0.5,
+        nx=256, xmin=-10.0, xmax=10.0, mx=4.0,
+        x0=5.0, vx0=0.0,
+        ny=4096, ymin=-15.0, ymax=130.0, my=0.25,
+        y0=10.0, vy0=-1.0,
+        sigmax=0.5, sigmay=3.0,
+        total_time=30.0, timesteps=4096,
+        lambda_=1.0,
+        n_eig=256,
     )
 
-    # Output MP4 path (node-local SSD on SLURM; current dir otherwise)
     mp4_dir = os.environ.get("SLURM_TMPDIR", ".")
-    os.makedirs(mp4_dir, exist_ok=True)
-    mp4_path = os.path.join(mp4_dir, "qq_smoke.mp4")
+    mp4_path = os.path.join(mp4_dir, "qq_movie_mx4_my0.25.mp4")
 
-    # Stream frames and stitch into MP4 (requires ffmpeg module on CC)
-    try:
-        qb.save_movie_mp4_streaming(
-            mp4_path=mp4_path,
-            every=4,   # save every 4th step to reduce I/O
-            fps=12,
-            keep_frames=False,  # delete PNGs after encoding
-        )
-    except FileNotFoundError as e:
-        # Usually happens if ffmpeg isn't available on the node
-        print("Error:", e)
-        print("Hint: on CC load ffmpeg: module load ffmpeg/6.1.1")
-        sys.exit(1)
+    qb.save_movie_mp4_streaming(
+        mp4_path=mp4_path,
+        every=8,   # save every 8th step → ~512 frames
+        fps=24,
+        keep_frames=False,
+    )
 
     print("Wrote:", mp4_path)
-
 
 if __name__ == "__main__":
     main()

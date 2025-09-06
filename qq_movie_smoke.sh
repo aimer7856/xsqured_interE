@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=qq_movie_smoke
-#SBATCH --time=00:20:00
+#SBATCH --time=00:45:00
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
 #SBATCH --output=%x-%j.out
@@ -19,26 +19,28 @@ module load scipy-stack/2020b    # if 2020b not present, try 2020a (see note bel
 # FFmpeg under this stack
 module load ffmpeg/4.3.2
 
-# (Optional) quick sanity checks
-python - <<'PY'
-import sys, numpy as np
-print("Python:", sys.version.split()[0], "NumPy:", np.__version__)
-PY
-which ffmpeg
-ffmpeg -version | head -n 1
-
-# ---- Stage code from PROJECT to node-local SSD and run from there ----
+# ---- Stage only what's required for the smoke run ----
+echo "[`date +%F' '%T`] staging code..." >&2
 CODE_DIR=/home/dykim/projects/def-sseahra/dykim/xsqured_interE
 WORK_DIR=$SLURM_TMPDIR/xsqured_interE
 mkdir -p "$WORK_DIR"
-rsync -a "$CODE_DIR/" "$WORK_DIR/"
+
+# copy only the driver and module (avoid rsync of the whole repo)
+cp -f "$CODE_DIR/qq_make_mp4.py" "$WORK_DIR/"
+# prefer QQ_wavefunc.py; also bring QQmodule.py as fallback for import
+cp -f "$CODE_DIR/QQ_wavefunc.py" "$WORK_DIR/" || true
+cp -f "$CODE_DIR/QQmodule.py"     "$WORK_DIR/" || true
+
 cd "$WORK_DIR"
+echo "[`date +%F' '%T`] staged to $WORK_DIR" >&2
 
-# Run the small movie driver (writes $SLURM_TMPDIR/qq_smoke.mp4)
-python qq_make_mp4.py
+# ---- Run Python unbuffered so prints flush to .out ----
+echo "[`date +%F' '%T`] starting python..." >&2
+python -u qq_make_mp4.py
+echo "[`date +%F' '%T`] python finished, copying mp4..." >&2
 
-# Copy only the MP4 to SCRATCH
+# ---- Copy only the MP4 to SCRATCH ----
 DEST="$SCRATCH/qq_movie_smoke_$SLURM_JOB_ID"
 mkdir -p "$DEST"
 cp "$SLURM_TMPDIR/qq_smoke.mp4" "$DEST/"
-echo "MP4 saved to: $DEST/qq_smoke.mp4"
+echo "[`date +%F' '%T`] MP4 saved to: $DEST/qq_smoke.mp4" >&2
