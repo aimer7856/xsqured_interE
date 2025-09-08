@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=qq_movie_mx4_my0.25
-#SBATCH --time=72:00:00
+#SBATCH --time=60:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --output=%x-%j.out
@@ -8,6 +8,11 @@
 #SBATCH --mail-user=doyeon.k@unb.ca
 #SBATCH --mail-type=BEGIN,END,FAIL
 set -euo pipefail
+
+# Use requested cores for threaded BLAS/SuperLU (harmless if unused)
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
+export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
+export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
 
 module --force purge
 module load StdEnv/2020
@@ -22,14 +27,21 @@ cp -f "$CODE_DIR/qq_movie_run.py" "$WORK_DIR/"
 cp -f "$CODE_DIR/QQ_wavefunc.py" "$WORK_DIR/" || true
 cp -f "$CODE_DIR/QQmodule.py"     "$WORK_DIR/" || true
 cd "$WORK_DIR"
-
 echo "SLURM_TMPDIR=$SLURM_TMPDIR  WORK_DIR=$WORK_DIR"
+
 echo "[`date +%F' '%T`] starting python..."
 python -u qq_movie_run.py
 echo "[`date +%F' '%T`] python finished, copying mp4..."
 
+# Copy the MP4 from SLURM_TMPDIR (where qq_movie_run.py writes it) to SCRATCH
 DEST="$SCRATCH/qq_movie_mx4_my0.25_$SLURM_JOB_ID"
 mkdir -p "$DEST"
-cp "$SLURM_TMPDIR/qq_movie_mx4_my0.25.mp4" "$DEST/" \
-  && echo "[`date +%F' '%T`] MP4 saved to: $DEST/qq_movie_mx4_my0.25.mp4" \
-  || echo "[`date +%F' '%T`] ERROR: MP4 not found at $SLURM_TMPDIR"
+
+SRC="$SLURM_TMPDIR/qq_movie_mx4_my0.25.mp4"
+if [[ -f "$SRC" ]]; then
+  cp "$SRC" "$DEST/" \
+    && echo "[`date +%F' '%T`] MP4 saved to: $DEST/qq_movie_mx4_my0.25.mp4"
+else
+  echo "[`date +%F' '%T`] ERROR: MP4 not found at $SRC"
+  exit 2
+fi

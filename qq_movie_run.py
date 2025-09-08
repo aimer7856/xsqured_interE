@@ -1,10 +1,16 @@
+#!/usr/bin/env python3
 import os, sys
 from pathlib import Path
+
+# Headless plotting on cluster
 os.environ.setdefault("MPLBACKEND", "Agg")
+
+# Ensure this directory is importable when run via sbatch
 THIS_DIR = Path(__file__).resolve().parent
 if str(THIS_DIR) not in sys.path:
     sys.path.insert(0, str(THIS_DIR))
 
+# Prefer QQ_wavefunc; fallback to QQmodule if needed
 try:
     from QQ_wavefunc import Quantum_Bipartite_System
 except ModuleNotFoundError:
@@ -20,9 +26,17 @@ def main():
         total_time=30.0, timesteps=4096,
         lambda_=1.0
     )
+
+    # Write to node-local SSD; sbatch copies to $SCRATCH afterwards
     mp4_dir = os.environ.get("SLURM_TMPDIR", ".")
     mp4_path = os.path.join(mp4_dir, "qq_movie_mx4_my0.25.mp4")
-    qb.save_movie_mp4_streaming(mp4_path=mp4_path, every=8, fps=24, keep_frames=False)
+
+    qb.save_movie_mp4_streaming(
+        mp4_path=mp4_path,
+        every=8,    # ~512 frames
+        fps=24,
+        keep_frames=False,
+    )
     print("Wrote:", mp4_path)
 
 if __name__ == "__main__":
