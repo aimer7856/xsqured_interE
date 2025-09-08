@@ -1,37 +1,29 @@
-"""
-Driver script for full QQ wavefunction evolution movie.
-Adjust nx, ny, timesteps, coupling, etc. as needed.
-"""
+import os, sys
+from pathlib import Path
+os.environ.setdefault("MPLBACKEND", "Agg")
+THIS_DIR = Path(__file__).resolve().parent
+if str(THIS_DIR) not in sys.path:
+    sys.path.insert(0, str(THIS_DIR))
 
-from QQ_wavefunc import Quantum_Bipartite_System
+try:
+    from QQ_wavefunc import Quantum_Bipartite_System
+except ModuleNotFoundError:
+    from QQmodule import Quantum_Bipartite_System
+
+def main():
+    qb = Quantum_Bipartite_System(
+        nx=256, xmin=-10.0, xmax=10.0, mx=4.0,
+        x0=5.0, vx0=0.0,
+        ny=4096, ymin=-15.0, ymax=130.0, my=0.25,
+        y0=10.0, vy0=-1.0,
+        sigmax=0.35, sigmay=3.0,
+        total_time=30.0, timesteps=4096,
+        lambda_=1.0
+    )
+    mp4_dir = os.environ.get("SLURM_TMPDIR", ".")
+    mp4_path = os.path.join(mp4_dir, "qq_movie_mx4_my0.25.mp4")
+    qb.save_movie_mp4_streaming(mp4_path=mp4_path, every=8, fps=24, keep_frames=False)
+    print("Wrote:", mp4_path)
 
 if __name__ == "__main__":
-    # --- Simulation parameters ---
-    nx = 256
-    ny = 4096
-    total_time = 40.0
-    timesteps = 4096
-    lambda_coupling = 1.0   # adjust for your interaction
-    every = 8               # save every 8th step
-    fps = 24                # smooth movie playback
-    mp4_path = "qq_movie.mp4"
-
-    # --- Build system ---
-    qb = Quantum_Bipartite_System(
-        nx=nx,
-        ny=ny,
-        total_time=total_time,
-        timesteps=timesteps,
-        lambda_=lambda_coupling,
-        # also pass x0, y0, px0, py0 if you want displaced/coherent initial state
-    )
-
-    # --- Run and save MP4 ---
-    qb.save_movie_mp4_streaming(
-        mp4_path=mp4_path,
-        every=every,
-        fps=fps,
-        keep_frames=False,
-    )
-
-    print(f"Wrote movie to {mp4_path}")
+    main()
